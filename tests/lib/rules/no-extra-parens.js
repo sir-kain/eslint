@@ -3444,6 +3444,28 @@ ruleTester.run("no-extra-parens", rule, {
                 `a ${operator} function () {};`,
                 "Identifier"
             )
-        )
+        ),
+
+        // Potential directives (no autofix)
+        invalid("('use strict');", "('use strict');"),
+        invalid("function f() { ('abc'); }", "function f() { ('abc'); }"),
+        invalid("(function () { ('abc'); })();", "(function () { ('abc'); })();"),
+        invalid("_ = () => { ('abc'); };", "_ = () => { ('abc'); };"),
+        invalid("'foo';(\"bar\");", "'foo';(\"bar\");"),
+
+        // Directive lookalikes
+        invalid("(12345);", "12345;"),
+        invalid("(('foo'));", "('foo');"),
+        invalid("(`foo`);", "`foo`;"),
+        invalid("void ('foo');", "void 'foo';"),
+        invalid("try { ('error'); } catch { }", "try { 'error'; } catch { }"),
+        invalid("{('')}", "{''}"),
+        invalid("_ = () => ('abc');", "_ = () => 'abc';"),
+        invalid("; ('abc');", "; 'abc';"),
+        {
+            code: "('foo');('bar');",
+            output: "('foo');'bar';",
+            errors: [{ messageId: "unexpected" }, { messageId: "unexpected" }]
+        }
     ]
 });
